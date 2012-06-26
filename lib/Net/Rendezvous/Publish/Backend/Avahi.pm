@@ -1,13 +1,13 @@
 package Net::Rendezvous::Publish::Backend::Avahi;
 
+# ABSTRACT: Publish zeroconf data via Avahi
+
 # vi: ts=4 sw=4
 
 use strict;
 use warnings;
 
 use Net::DBus;
-
-our $VERSION = 0.03;
 
 sub new {
 	my $class = shift;
@@ -67,37 +67,22 @@ sub step {
 
 1;
 
-__END__
+=head1 COPYRIGHT AND LICENSE
 
-=head1 NAME
+Copyright (c) 2006 by Jack Bates.  All rights reserved.
 
-Net::Rendezvous::Publish::Backend::Avahi - Publish zeroconf data with the Avahi
-library.
+Copyright (c) 2012 by Ioan Rogers.
 
-=head1 DESCRIPTION
-
-This module publishes zeroconf data with the Avahi library.
-
-It's a backend for the Net::Rendezvous::Publish module.
-
-=head1 PREREQUISITES
-
-Net::DBus
-
-Net::Rendezvous::Publish
-
-=head1 AUTHOR
-
-Jack Bates <ms419@freezone.co.uk>
-
-=head1 COPYRIGHT
-
-Copyright 2006, Jack Bates.  All rights reserved.
-
-This program is free software.  You can redistribute it and/or modify it under the same terms as Perl itself.
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =head1 SEE ALSO
 
-Net::Rendezvous::Publish - The module this module supports.
+=over
 
-L<Avahi|http://avahi.org/>
+=item L<Net::Rendezvous::Publish> - The module this module supports.
+
+=item L<Avahi|http://avahi.org/>
+
+=back
+
