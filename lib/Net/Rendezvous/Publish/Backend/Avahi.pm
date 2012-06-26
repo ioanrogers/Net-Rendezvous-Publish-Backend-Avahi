@@ -26,20 +26,30 @@ sub publish {
 	my $self = shift;
 	my %args = @_;
 
+	# AddService argument signature is aay.  Split first into key/value
+	# pairs at character \x01 ... 
+	my $txt = $args{txt} || [];
+	unless (ref $txt) {
+		$txt = [map {
+			[(split //, $_)]
+		} (split /\x01/, $txt)];
+	}
+	# ... then map characters to bytes and add DBus type.
+	if (@{$txt}) {
+		foreach my $t (@{$txt}) {
+			map {
+				$_ = Net::DBus::dbus_byte(ord($_))
+			} @{$t};
+		}
+	}
+
 	my $group = $self->{service}->get_object(
 		$self->{server}->EntryGroupNew, 'org.freedesktop.Avahi.EntryGroup');
 	$group->AddService(Net::DBus::dbus_int32(-1), Net::DBus::dbus_int32(-1),
 		Net::DBus::dbus_uint32(0), $args{name}, $args{type},
 		$args{domain}, $args{host}, Net::DBus::dbus_uint16($args{port}),
+		$txt);
 
-		# AddService argument signature is aay.  Split first into key/value
-		# pairs at character \x01, then map characters to bytes and add DBus
-		# type.
-		[map {
-			[map {
-				Net::DBus::dbus_byte(ord($_))
-			} (split //, $_)]
-		} (split /\x01/, $args{txt})]);
 	$group->Commit;
 
 	return $group;
