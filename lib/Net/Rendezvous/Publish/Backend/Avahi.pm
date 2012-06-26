@@ -10,56 +10,56 @@ use warnings;
 use Net::DBus;
 
 sub new {
-	my $class = shift;
-	my $self = {@_};
-	bless $self, $class;
+    my $class = shift;
+    my $self  = {@_};
+    bless $self, $class;
 
-	my $bus = Net::DBus->system;
-	$self->{service} = $bus->get_service('org.freedesktop.Avahi');
-	$self->{server} = $self->{service}->get_object(
-		'/', 'org.freedesktop.Avahi.Server');
+    my $bus = Net::DBus->system;
+    $self->{service} = $bus->get_service('org.freedesktop.Avahi');
+    $self->{server} =
+      $self->{service}->get_object('/', 'org.freedesktop.Avahi.Server');
 
-	return $self;
+    return $self;
 }
 
 sub publish {
-	my $self = shift;
-	my %args = @_;
+    my $self = shift;
+    my %args = @_;
 
-	# AddService argument signature is aay.  Split first into key/value
-	# pairs at character \x01 ... 
-	my $txt = $args{txt} || [];
-	unless (ref $txt) {
-		$txt = [map {
-			[(split //, $_)]
-		} (split /\x01/, $txt)];
-	}
-	# ... then map characters to bytes and add DBus type.
-	if (@{$txt}) {
-		foreach my $t (@{$txt}) {
-			map {
-				$_ = Net::DBus::dbus_byte(ord($_))
-			} @{$t};
-		}
-	}
+    # AddService argument signature is aay.  Split first into key/value
+    # pairs at character \x01 ...
+    my $txt = $args{txt} || [];
+    unless (ref $txt) {
+        $txt = [map { [(split //, $_)] } (split /\x01/, $txt)];
+    }
 
-	my $group = $self->{service}->get_object(
-		$self->{server}->EntryGroupNew, 'org.freedesktop.Avahi.EntryGroup');
-	$group->AddService(Net::DBus::dbus_int32(-1), Net::DBus::dbus_int32(-1),
-		Net::DBus::dbus_uint32(0), $args{name}, $args{type},
-		$args{domain}, $args{host}, Net::DBus::dbus_uint16($args{port}),
-		$txt);
+    # ... then map characters to bytes and add DBus type.
+    if (@{$txt}) {
+        foreach my $t (@{$txt}) {
+            map { $_ = Net::DBus::dbus_byte(ord($_)) } @{$t};
+        }
+    }
 
-	$group->Commit;
+    my $group = $self->{service}->get_object($self->{server}->EntryGroupNew,
+        'org.freedesktop.Avahi.EntryGroup');
+    $group->AddService(
+        Net::DBus::dbus_int32(-1), Net::DBus::dbus_int32(-1),
+        Net::DBus::dbus_uint32(0), $args{name},
+        $args{type},               $args{domain},
+        $args{host},               Net::DBus::dbus_uint16($args{port}),
+        $txt
+    );
 
-	return $group;
+    $group->Commit;
+
+    return $group;
 }
 
 sub publish_stop {
-	my $self = shift;
-	my ($group) = @_;
+    my $self = shift;
+    my ($group) = @_;
 
-	$group->Free;
+    $group->Free;
 }
 
 sub step {
